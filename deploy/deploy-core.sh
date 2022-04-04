@@ -3,6 +3,8 @@
 # args: 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
+ls
+
 if [ "$1" = "" ]
 then
     echo "Missing overwrite/dontoverwrite argument. Exiting."
