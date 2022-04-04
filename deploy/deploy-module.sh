@@ -2,7 +2,7 @@
 
 # args: network name; module name; module path; overwrite/dontoverwrite to redeploy and commit new addresses; constructor abi or 'noargs'; any constructor args
 # example: bash deploy/deploy-module.sh rinkeby overwrite Asks/V1.1/AsksV1_1.sol AsksV1_1 "constructor(address)"" "0xasdf"
-# env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
+# env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY
 
 # supported chains (via ethers_rs which uses corresponding chain_ids):
 # Mainnet
@@ -24,54 +24,78 @@
 echo "Loading env..."
 source .env
 
-if [ "$1" = "" ]
+if [ "$ETHERSCAN_API_KEY" = "" ]
 then
-    echo "Missing network name argument. Exiting."
+    echo "Missing ETHERSCAN_API_KEY. Exiting."
     exit 1
 fi
-NETWORK_NAME=$(echo $1 | tr '[:lower:]' '[:upper:]')
 
-if [ "$2" = "" ]
+if [ "$CHAIN_ID" = "" ]
+then
+    echo "Missing CHAIN_ID. Exiting."
+    exit 1
+fi
+
+if [ "$RPC_URL" = "" ]
+then
+    echo "Missing RPC_URL. Exiting."
+    exit 1
+fi
+
+if [ "$PRIVATE_KEY" = "" ]
+then
+    echo "Missing PRIVATE_KEY. Exiting."
+    exit 1
+fi
+
+if [ "$WALLET_ADDRESS" = "" ]
+then
+    echo "Missing WALLET_ADDRESS. Exiting."
+    exit 1
+fi
+
+
+if [ "$1" = "" ]
 then
     echo "Missing overwrite/dontoverwrite argument. Exiting."
     exit 1
 fi
-if [ "$2" != "overwrite" ] && [ "$2" != "dontoverwrite" ]
+if [ "$1" != "overwrite" ] && [ "$1" != "dontoverwrite" ]
 then
     echo "Invalid overwrite/dontoverwrite argument. Exiting."
     exit 1
 fi
-OVERWRITE="$2"
+OVERWRITE="$1"
 
-if [ "$3" = "" ] || [ ! -f "./contracts/modules/$3" ]
+if [ "$2" = "" ] || [ ! -f "./contracts/modules/$2" ]
 then
     echo "Module path missing or incorrect. Exiting."
     exit 1
 fi
-MODULE_PATH="$3"
+MODULE_PATH="$2"
 
-if [ "$4" = "" ]
+if [ "$3" = "" ]
 then
     echo "Missing module name argument. Exiting."
     exit 1
 fi
-MODULE_NAME="$4"
+MODULE_NAME="$3"
 
 CONSTRUCTOR_ABI=""
-if [ "$5" = "" ]
+if [ "$4" = "" ]
 then
     echo "Missing constructor abi argument. Exiting."
     exit 1
 fi
-if [ "$5" != "noargs" ] && [[ $5 != constructor* ]]
+if [ "$4" != "noargs" ] && [[ $4 != constructor* ]]
 then
     echo "Invalid constructor abi argument. Exiting."
     exit 1
 fi
-if [[ $5 = constructor* ]]
+if [[ $4 = constructor* ]]
 then
-    CONSTRUCTOR_ABI="$5"
-    if [ -z "$6" ]
+    CONSTRUCTOR_ABI="$4"
+    if [ -z "$5" ]
     then
         echo "Provided constructor abi but no constructor arguments. Exiting."
         exit 1
@@ -99,7 +123,7 @@ then
 fi
 
 # unset first 5 args, leaving only constructor args
-shift 5
+shift 4
 
 echo ""
 
