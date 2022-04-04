@@ -38,6 +38,7 @@ jobs:
       - name: Push new addresses
         uses: EndBug/add-and-commit@v9
         with:
+          add: addresses/${{ github.event.inputs.chainid }}.json
           message: 'Commit from Github Actions (deploy core)'
 
           # If this input is set, the action will push the commit to a new branch with this name.
