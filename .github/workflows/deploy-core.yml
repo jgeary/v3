@@ -14,4 +14,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup
-        run: which python3
+        run: curl -L https://foundry.paradigm.xyz | bash && foundryup && forge
