@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# args: network name; module name; module path; overwrite/nooverwrite to redeploy and commit new addresses; constructor abi or 'noargs'; any constructor args
+# args: network name; module name; module path; overwrite/dontoverwrite to redeploy and commit new addresses; constructor abi or 'noargs'; any constructor args
 # example: bash deploy/deploy-module.sh rinkeby overwrite Asks/V1.1/AsksV1_1.sol AsksV1_1 "constructor(address)"" "0xasdf"
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
@@ -117,6 +117,7 @@ else
     echo "Could not find contract address in forge output"
     exit 1
 fi
+MODULE_ADDR=$(cast --to-checksum-address $MODULE_ADDR)
 echo "Submitting contract to etherscan for verification..."
 MODULE_VERIFY_CMD="forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000"
 if [[ $CONSTRUCTOR_ABI = constructor* ]]
@@ -135,6 +136,7 @@ do
 	@@ -177,5 +145,31 @@ do
 done
 
+python3 ./deploy/update-addresses.py $CHAIN_ID MODULE_NAME $MODULE_ADDR
 
 echo ""
 echo "Done."
