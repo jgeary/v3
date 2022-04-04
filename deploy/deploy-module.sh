@@ -156,7 +156,16 @@ do
         then
             echo "Submitted contract for verification."
             break
-	@@ -177,5 +145,31 @@ do
+        else
+            if (( 4 > $I ))
+            then
+                sleep 10
+            else
+                echo "Unable to submit contract verification. Exiting."
+                exit 1
+            fi
+        fi
+    }
 done
 
 python3 ./deploy/update-addresses.py $CHAIN_ID MODULE_NAME $MODULE_ADDR
