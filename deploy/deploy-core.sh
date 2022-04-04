@@ -1,24 +1,18 @@
 #!/bin/bash
 
-# args: network name; 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
+# args: 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
 echo "Loading env..."
 source .env
 
-if [ "$1" = "" ]
-then
-    echo "Missing network name argument. Exiting."
-    exit 1
-fi
-NETWORK_NAME=$(echo $1 | tr '[:lower:]' '[:upper:]')
 
-if [ "$2" = "" ]
+if [ "$1" = "" ]
 then
     echo "Missing overwrite/dontoverwrite argument. Exiting."
     exit 1
 fi
-if [ "$2" != "overwrite" ] && [ "$2" != "dontoverwrite" ]
+if [ "$1" != "overwrite" ] && [ "$1" != "dontoverwrite" ]
 then
     echo "Invalid overwrite/dontoverwrite argument. Exiting."
     exit 1
@@ -65,7 +59,7 @@ echo "Checking for existing contract addresses"
 if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['ZoraProtocolFeeSettings'])" 2> /dev/null)
 then
     echo "ZoraProtocolFeeSettings already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
-    if [ "$2" != "overwrite" ]
+    if [ "$1" != "overwrite" ]
         echo "Exiting."
         exit 1
     else
@@ -75,7 +69,7 @@ fi
 if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['ZoraModuleManager'])" 2> /dev/null)
 then
     echo "ZoraModuleManager already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
-    if [ "$2" != "overwrite" ]
+    if [ "$1" != "overwrite" ]
         echo "Exiting."
         exit 1
     else
