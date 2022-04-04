@@ -15,7 +15,8 @@ if __name__ == '__main__':
     file_exists = exists(file_path)
     addrs_dict = {}
     if (file_exists):
-        addrs_dict = json.load(file_path)
+        with open(file_path) as f:
+            addrs_dict = json.load(f)
     for i in list(range(2, num_args, 2)):
         addrs_dict[sys.argv[i]] = sys.argv[i+1]
     with open(file_path, "w") as write_file:
