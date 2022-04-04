@@ -24,4 +24,12 @@ jobs:
           version: nightly
       - name: Run deploy script
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
+    env:
+      ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+      CHAIN_ID: ${{ secrets.CHAIN_ID }}
+      RPC_URL: ${{ secrets.RPC_URL }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
+      REGISTRAR: ${{ secrets.REGISTRAR }}
+      FEE_SETTINGS_OWNER: ${{ secrets.FEE_SETTINGS_OWNER }}
  
