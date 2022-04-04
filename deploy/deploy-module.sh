@@ -21,9 +21,6 @@
 # ArbitrumTestnet
 # Cronos
 
-echo "Loading env..."
-source .env
-
 if [ "$ETHERSCAN_API_KEY" = "" ]
 then
     echo "Missing ETHERSCAN_API_KEY. Exiting."
