@@ -4,7 +4,6 @@
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
 echo "test" > test.txt
-git add . && git commit -m "test" && git push -u origin/main
 
 if [ "$1" = "" ]
 then
