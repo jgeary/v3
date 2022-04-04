@@ -169,7 +169,7 @@ else
     echo "ZoraProtocolFeeSettings.setOwner transaction $FEE_SETTINGS_SET_OWNER_TX_HASH succeeded."
 fi
 
-python3 ./deploy/update-adresses.py $CHAIN_ID ZoraProtocolFeeSettings $FEE_SETTINGS_ADDR ZoraModuleManager $MODULE_MANAGER_ADDR
+python3 update-adresses.py $CHAIN_ID ZoraProtocolFeeSettings $FEE_SETTINGS_ADDR ZoraModuleManager $MODULE_MANAGER_ADDR
 
 echo ""
 echo "Done."
