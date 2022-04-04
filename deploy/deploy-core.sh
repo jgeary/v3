@@ -78,7 +78,6 @@ echo ""
 echo "Deploying ZoraProtocolFeeSettings..."
 FEE_SETTINGS_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraProtocolFeeSettings)
 FEE_SETTINGS_ADDR=$(echo $FEE_SETTINGS_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
-FEE_SETTINGS_ADDR=$(cast --to-checksum-address $FEE_SETTINGS_ADDR)
 if [[ $FEE_SETTINGS_ADDR =~ ^0x[0-9a-f]{40}$ ]]
 then
     echo "ZoraProtocolFeeSettings deployed to $FEE_SETTINGS_ADDR"
@@ -86,6 +85,8 @@ else
     echo "Could not find contract address in forge output"
     exit 1
 fi
+FEE_SETTINGS_ADDR=$(cast --to-checksum-address $FEE_SETTINGS_ADDR)
+
 echo "Submitting contract to etherscan for verification..."
 for I in 0 1 2 3 4
 do
@@ -113,7 +114,6 @@ echo ""
 echo "Deploying ZoraModuleManager..."
 MODULE_MANAGER_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraModuleManager --constructor-args "$REGISTRAR" --constructor-args "$FEE_SETTINGS_ADDR")
 MODULE_MANAGER_ADDR=$(echo $MODULE_MANAGER_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
-MODULE_MANAGER_ADDR=$(cast --to-checksum-address $MODULE_MANAGER_ADDR)
 if [[ $MODULE_MANAGER_ADDR =~ ^0x[0-9a-f]{40}$ ]]
 then
     echo "ZoraModuleManager deployed to $MODULE_MANAGER_ADDR"
@@ -122,6 +122,8 @@ else
     echo $MODULE_MANAGER_DEPLOY_OUTPUT
     exit 1
 fi
+MODULE_MANAGER_ADDR=$(cast --to-checksum-address $MODULE_MANAGER_ADDR)
+
 echo "Submitting contract to etherscan for verification..."
 MODULE_MANAGER_ENCODED_ARGS=$(cast abi-encode "constructor(address,address)" "$REGISTRAR" "$FEE_SETTINGS_ADDR")
 for I in 0 1 2 3 4
