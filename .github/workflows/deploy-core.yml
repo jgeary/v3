@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER.'
+        description: 'Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER.'
+        required: true
+      chainid:
+        description: 'Chain id number. Must correspond with given environment - i.e. environment = "rinkeby", chainid = "4".'
         required: true
       overwrite:
         description: 'Enter "overwrite" to deploy even if core contracts already have addresses in addresses/<chain-id>.json file.'
@@ -34,7 +37,7 @@ jobs:
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
     env:
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-      CHAIN_ID: ${{ secrets.CHAIN_ID }}
+      CHAIN_ID: ${{ github.event.inputs.chainid }}
       RPC_URL: ${{ secrets.RPC_URL }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
