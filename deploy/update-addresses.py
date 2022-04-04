@@ -16,7 +16,7 @@ if __name__ == '__main__':
     addrs_dict = {}
     if (file_exists):
         addrs_dict = json.load(file_path)
-    for i in list(range(1, num_args, 2)):
+    for i in list(range(2, num_args, 2)):
         addrs_dict[sys.argv[i]] = sys.argv[i+1]
     with open(file_path, "w") as write_file:
         json.dump(addrs_dict, write_file, indent=4, sort_keys=True)
