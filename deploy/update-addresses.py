@@ -8,7 +8,7 @@ from os.path import exists
 if __name__ == '__main__':
     print(str(sys.argv))
     num_args = len(sys.argv)
-    if num_args % 2 == 0 or num_args < 3:
+    if num_args % 2 != 0 or num_args < 4:
         raise Exception('args must be chainid followed by pairs of contract name, contract address')
     chain_id = sys.argv[0]
     file_path = 'addresses/' + chain_id + '.json'
