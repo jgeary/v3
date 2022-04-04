@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # args: network name; 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
-# env: ETHERSCAN_API_KEY, <NETWORK_NAME>_CHAIN_ID, <NETWORK_NAME>_RPC_URL, <NETWORK_NAME>_PRIVATE_KEY, <NETWORK_NAME>_WALLET_ADDRESS, <NETWORK_NAME>_REGISTRAR, <NETWORK_NAME>_FEE_SETTINGS_OWNER
+# env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
 echo "Loading env..."
 source .env
