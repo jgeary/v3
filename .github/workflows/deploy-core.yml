@@ -13,10 +13,13 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
       - name: Run deploy script
-        run: bash deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
+        run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
  
