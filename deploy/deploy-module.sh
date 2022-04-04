@@ -80,7 +80,9 @@ fi
 
 if [ "$CHAIN_ID" = "" ]
 then
-	@@ -116,51 +52,83 @@ fi
+    echo "Missing CHAIN_ID. Exiting."
+    exit 1
+fi
 
 ADDRESSES_FILENAME="addresses/$CHAIN_ID.json"
 echo "Checking for existing contract addresses"
