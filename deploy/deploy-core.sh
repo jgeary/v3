@@ -56,6 +56,7 @@ if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME"
 then
     echo "ZoraProtocolFeeSettings already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
     if [ "$1" != "overwrite" ]
+    then
         echo "Exiting."
         exit 1
     else
@@ -66,6 +67,7 @@ if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME"
 then
     echo "ZoraModuleManager already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
     if [ "$1" != "overwrite" ]
+    then
         echo "Exiting."
         exit 1
     else
