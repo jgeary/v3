@@ -37,16 +37,7 @@ jobs:
         with:
           add: addresses/${{ github.event.inputs.chainid }}.json
           message: 'Commit from Github Actions (deploy core)'
-
-          # If this input is set, the action will push the commit to a new branch with this name.
-          # Default: ''
           new_branch: main
-
-          # The way the action should handle pathspec errors from the add and remove commands. Three options are available:
-          # - ignore -> errors will be logged but the step won't fail
-          # - exitImmediately -> the action will stop right away, and the step will fail
-          # - exitAtEnd -> the action will go on, every pathspec error will be logged at the end, the step will fail.
-          # Default: ignore
           pathspec_error_handling: ignore
     env:
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
