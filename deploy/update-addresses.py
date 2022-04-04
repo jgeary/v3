@@ -6,6 +6,7 @@ import sys, json
 from os.path import exists
 
 if __name__ == '__main__':
+    print(str(sys.argv))
     num_args = len(sys.argv)
     if num_args % 2 == 0 or num_args < 3:
         raise Exception('args must be chainid followed by pairs of contract name, contract address')
