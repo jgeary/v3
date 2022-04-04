@@ -7,7 +7,7 @@ on:
         description: 'Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER.'
         required: true
       overwrite:
-        description: 'Must equal "overwrite" or "nooverwrite". "overwrite" will deploy new contracts even if core contracts already have addresses in addresses/<chain-id>.json file.'
+        description: 'Must equal "overwrite" or "dontoverwrite". "overwrite" will deploy new contracts even if core contracts already have addresses in addresses/<chain-id>.json file.'
         required: true
 
 jobs:
