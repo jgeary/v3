@@ -3,15 +3,17 @@ name: Deploy Core
 on:
   workflow_dispatch:
     inputs:
-      network:
-        description: 'Network name like "rinkeby". Must have corresponding environment variables prefixed with "<network name in all caps>_".'
+      environment:
+        description: 'Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER.'
         required: true
       overwrite:
         description: 'Must equal "overwrite" or "nooverwrite". "overwrite" will deploy new contracts even if core contracts already have addresses in addresses/<chain-id>.json file.'
+        required: true
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
     steps:
       - uses: actions/checkout@v2
         with:
