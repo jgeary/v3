@@ -24,9 +24,6 @@ jobs:
         with:
           node-version: "16"
       - run: npm install
-      - uses: onbjerg/foundry-toolchain@v1
-        with:
-          version: nightly
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
