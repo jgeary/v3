@@ -23,7 +23,7 @@ jobs:
         with:
           version: nightly
       - name: Run deploy script
-        run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
+        run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
     env:
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
       CHAIN_ID: ${{ secrets.CHAIN_ID }}
