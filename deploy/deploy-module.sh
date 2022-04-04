@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# args: network name; module name; module path; overwrite/nooverwrite to redeploy and commit new addresses; constructor abi or 'noargs'
+# args: network name; module name; module path; overwrite/nooverwrite to redeploy and commit new addresses; constructor abi or 'noargs'; any constructor args
 # example: bash deploy/deploy-module.sh rinkeby overwrite Asks/V1.1/AsksV1_1.sol AsksV1_1 "constructor(address)"" "0xasdf"
-# env: ETHERSCAN_API_KEY, <NETWORK_NAME>_CHAIN_ID, <NETWORK_NAME>_RPC_URL, <NETWORK_NAME>_PRIVATE_KEY, <NETWORK_NAME>_WALLET_ADDRESS, <NETWORK_NAME>_REGISTRAR, <NETWORK_NAME>_FEE_SETTINGS_OWNER
+# env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
 # supported chains (via ethers_rs which uses corresponding chain_ids):
 # Mainnet
@@ -78,48 +78,36 @@ then
     fi
 fi
 
-CHAIN_ID_NAME="$NETWORK_NAME"_CHAIN_ID
-CHAIN_ID="${!CHAIN_ID_NAME}"
 if [ "$CHAIN_ID" = "" ]
 then
     echo "Missing CHAIN_ID. Exiting."
     exit 1
 fi
 
-RPC_URL_NAME="$NETWORK_NAME"_RPC_URL
-RPC_URL="${!RPC_URL_NAME}"
 if [ "$RPC_URL" = "" ]
 then
     echo "Missing RPC_URL. Exiting."
     exit 1
 fi
 
-PRIVATE_KEY_NAME="$NETWORK_NAME"_PRIVATE_KEY
-PRIVATE_KEY="${!PRIVATE_KEY_NAME}"
 if [ "$PRIVATE_KEY" = "" ]
 then
     echo "Missing PRIVATE_KEY. Exiting."
     exit 1
 fi
 
-WALLET_ADDRESS_NAME="$NETWORK_NAME"_WALLET_ADDRESS
-WALLET_ADDRESS="${!WALLET_ADDRESS_NAME}"
 if [ "$WALLET_ADDRESS" = "" ]
 then
     echo "Missing WALLET_ADDRESS. Exiting."
     exit 1
 fi
 
-REGISTRAR_NAME="$NETWORK_NAME"_REGISTRAR
-REGISTRAR="${!REGISTRAR_NAME}"
 if [ "$REGISTRAR" = "" ]
 then
     echo "Missing REGISTRAR. Exiting."
     exit 1
 fi
 
-FEE_SETTINGS_OWNER_NAME="$NETWORK_NAME"_FEE_SETTINGS_OWNER
-FEE_SETTINGS_OWNER="${!FEE_SETTINGS_OWNER_NAME}"
 if [ "$FEE_SETTINGS_OWNER" = "" ]
 then
     echo "Missing FEE_SETTINGS_OWNER. Exiting."
