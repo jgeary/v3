@@ -18,5 +18,6 @@ jobs:
         with:
           version: nightly
       - name: Run deploy script
-        run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
+        run: pwd
+        # run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
  
