@@ -3,8 +3,6 @@
 # args: 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
-echo "test" > test.txt
-
 if [ "$1" = "" ]
 then
     echo "Missing overwrite/dontoverwrite argument. Exiting."
@@ -171,6 +169,7 @@ else
     echo "ZoraProtocolFeeSettings.setOwner transaction $FEE_SETTINGS_SET_OWNER_TX_HASH succeeded."
 fi
 
+python3 ./deploy/update-adresses.py $CHAIN_ID ZoraProtocolFeeSettings $FEE_SETTINGS_ADDR ZoraModuleManager $MODULE_MANAGER_ADDR
 
 echo ""
 echo "Done."
