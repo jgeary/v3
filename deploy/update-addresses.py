@@ -20,3 +20,4 @@ if __name__ == '__main__':
         addrs_dict[sys.argv[i]] = sys.argv[i+1]
     with open(file_path, "w") as write_file:
         json.dump(addrs_dict, write_file, indent=4, sort_keys=True)
+        write_file.write("\n")
