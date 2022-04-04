@@ -10,7 +10,7 @@ if __name__ == '__main__':
     num_args = len(sys.argv)
     if num_args % 2 != 0 or num_args < 4:
         raise Exception('args must be chainid followed by pairs of contract name, contract address')
-    chain_id = sys.argv[0]
+    chain_id = sys.argv[1]
     file_path = 'addresses/' + chain_id + '.json'
     file_exists = exists(file_path)
     addrs_dict = {}
