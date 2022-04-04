@@ -8,9 +8,9 @@ then
     echo "Missing overwrite/dontoverwrite argument. Exiting."
     exit 1
 fi
-if [ "$1" != "overwrite" ] && [ "$1" != "dontoverwrite" ]
+if [ "$1" != "overwrite" ] && [ "$1" != "" ]
 then
-    echo "Invalid overwrite/dontoverwrite argument. Exiting."
+    echo "Invalid overwrite argument. Exiting."
     exit 1
 fi
 
