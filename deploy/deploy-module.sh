@@ -1,72 +1,93 @@
 #!/bin/bash
 
-# args: 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
+# args: network name; module name; module path; overwrite/nooverwrite to redeploy and commit new addresses; constructor abi or 'noargs'; any constructor args
+# example: bash deploy/deploy-module.sh rinkeby overwrite Asks/V1.1/AsksV1_1.sol AsksV1_1 "constructor(address)"" "0xasdf"
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
+# supported chains (via ethers_rs which uses corresponding chain_ids):
+# Mainnet
+# Ropsten Kovan Rinkeby Goerli
+# Polygon
+# PolygonMumbai
+# Avalanche
+# AvalancheFuji
+# Optimism
+# OptimismKovan
+# Fantom
+# FantomTestnet
+# BinanceSmartChain
+# BinanceSmartChainTestnet
+# Arbitrum
+# ArbitrumTestnet
+# Cronos
+
+echo "Loading env..."
+source .env
+
 if [ "$1" = "" ]
+then
+    echo "Missing network name argument. Exiting."
+    exit 1
+fi
+NETWORK_NAME=$(echo $1 | tr '[:lower:]' '[:upper:]')
+
+if [ "$2" = "" ]
 then
     echo "Missing overwrite/dontoverwrite argument. Exiting."
     exit 1
 fi
-if [ "$1" != "overwrite" ] && [ "$1" != "" ]
+if [ "$2" != "overwrite" ] && [ "$2" != "dontoverwrite" ]
 then
-    echo "Invalid overwrite argument. Exiting."
+    echo "Invalid overwrite/dontoverwrite argument. Exiting."
     exit 1
+fi
+OVERWRITE="$2"
+
+if [ "$3" = "" ] || [ ! -f "./contracts/modules/$3" ]
+then
+    echo "Module path missing or incorrect. Exiting."
+    exit 1
+fi
+MODULE_PATH="$3"
+
+if [ "$4" = "" ]
+then
+    echo "Missing module name argument. Exiting."
+    exit 1
+fi
+MODULE_NAME="$4"
+
+CONSTRUCTOR_ABI=""
+if [ "$5" = "" ]
+then
+    echo "Missing constructor abi argument. Exiting."
+    exit 1
+fi
+if [ "$5" != "noargs" ] && [[ $5 != constructor* ]]
+then
+    echo "Invalid constructor abi argument. Exiting."
+    exit 1
+fi
+if [[ $5 = constructor* ]]
+then
+    CONSTRUCTOR_ABI="$5"
+    if [ -z "$6" ]
+    then
+        echo "Provided constructor abi but no constructor arguments. Exiting."
+        exit 1
+    fi
 fi
 
 if [ "$CHAIN_ID" = "" ]
 then
-    echo "Missing CHAIN_ID. Exiting."
-    exit 1
-fi
-
-if [ "$RPC_URL" = "" ]
-then
-    echo "Missing RPC_URL. Exiting."
-    exit 1
-fi
-
-if [ "$PRIVATE_KEY" = "" ]
-then
-    echo "Missing PRIVATE_KEY. Exiting."
-    exit 1
-fi
-
-if [ "$WALLET_ADDRESS" = "" ]
-then
-    echo "Missing WALLET_ADDRESS. Exiting."
-    exit 1
-fi
-
-if [ "$REGISTRAR" = "" ]
-then
-    echo "Missing REGISTRAR. Exiting."
-    exit 1
-fi
-
-if [ "$FEE_SETTINGS_OWNER" = "" ]
-then
-    echo "Missing FEE_SETTINGS_OWNER. Exiting."
-    exit 1
-fi
+	@@ -116,51 +52,83 @@ fi
 
 ADDRESSES_FILENAME="addresses/$CHAIN_ID.json"
 echo "Checking for existing contract addresses"
-if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['ZoraProtocolFeeSettings'])" 2> /dev/null)
+if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['$MODULE_NAME'])" 2> /dev/null)
 then
-    echo "ZoraProtocolFeeSettings already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
-    if [ "$1" != "overwrite" ]
-    then
-        echo "Exiting."
-        exit 1
-    else
-        echo "Continuing."
-    fi
-fi
-if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['ZoraModuleManager'])" 2> /dev/null)
-then
-    echo "ZoraModuleManager already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
-    if [ "$1" != "overwrite" ]
+    echo "$MODULE_NAME already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
+    if [ $OVERWRITE = "dontoverwrite" ]
     then
         echo "Exiting."
         exit 1
@@ -75,101 +96,45 @@ then
     fi
 fi
 
+# unset first 5 args, leaving only constructor args
+shift 5
+
 echo ""
 
 
-echo "Deploying ZoraProtocolFeeSettings..."
-FEE_SETTINGS_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraProtocolFeeSettings)
-FEE_SETTINGS_ADDR=$(echo $FEE_SETTINGS_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
-if [[ $FEE_SETTINGS_ADDR =~ ^0x[0-9a-f]{40}$ ]]
+echo "Deploying $MODULE_NAME..."
+MODULE_DEPLOY_CMD="forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $MODULE_NAME"
+for arg in "$@"
+do
+    MODULE_DEPLOY_CMD="${MODULE_DEPLOY_CMD} --constructor-args $arg"
+done
+MODULE_DEPLOY_OUTPUT=$(${MODULE_DEPLOY_CMD})
+MODULE_ADDR=$(echo $MODULE_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
+if [[ $MODULE_ADDR =~ ^0x[0-9a-f]{40}$ ]]
 then
-    echo "ZoraProtocolFeeSettings deployed to $FEE_SETTINGS_ADDR"
+    echo "$MODULE_NAME deployed to $MODULE_ADDR"
 else
     echo "Could not find contract address in forge output"
     exit 1
 fi
 echo "Submitting contract to etherscan for verification..."
+MODULE_VERIFY_CMD="forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000"
+if [[ $CONSTRUCTOR_ABI = constructor* ]]
+then
+    MODULE_ENCODED_ARGS=$(cast abi-encode $CONSTRUCTOR_ABI "$@")
+    MODULE_VERIFY_CMD="${MODULE_VERIFY_CMD} --constructor-args $MODULE_ENCODED_ARGS"
+fi
+MODULE_VERIFY_CMD="${MODULE_VERIFY_CMD} --compiler-version v0.8.10+commit.fc410830 $MODULE_ADDR contracts/modules/$MODULE_PATH:$MODULE_NAME $ETHERSCAN_API_KEY"
 for I in 0 1 2 3 4
 do
     {
-        if FEE_SETTINGS_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --compiler-version v0.8.10+commit.fc410830 "$FEE_SETTINGS_ADDR" contracts/auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol:ZoraProtocolFeeSettings "$ETHERSCAN_API_KEY" 2> /dev/null)
+        if MODULE_VERIFY_OUTPUT=$(${MODULE_VERIFY_CMD} 2> /dev/null)
         then
             echo "Submitted contract for verification."
             break
-        else
-            if (( 4 > $I ))
-            then
-                sleep 10
-            else
-                echo "Unable to submit contract verification. Exiting."
-                exit 1
-            fi
-        fi
-    }
+	@@ -177,5 +145,31 @@ do
 done
 
-
-echo ""
-
-
-echo "Deploying ZoraModuleManager..."
-MODULE_MANAGER_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraModuleManager --constructor-args "$REGISTRAR" --constructor-args "$FEE_SETTINGS_ADDR")
-MODULE_MANAGER_ADDR=$(echo $MODULE_MANAGER_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
-if [[ $MODULE_MANAGER_ADDR =~ ^0x[0-9a-f]{40}$ ]]
-then
-    echo "ZoraModuleManager deployed to $MODULE_MANAGER_ADDR"
-else
-    echo "Could not find contract address in forge output"
-    echo $MODULE_MANAGER_DEPLOY_OUTPUT
-    exit 1
-fi
-echo "Submitting contract to etherscan for verification..."
-MODULE_MANAGER_ENCODED_ARGS=$(cast abi-encode "constructor(address,address)" "$REGISTRAR" "$FEE_SETTINGS_ADDR")
-for I in 0 1 2 3 4
-do
-    {
-        if MODULE_MANAGER_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --constructor-args "$MODULE_MANAGER_ENCODED_ARGS" --compiler-version v0.8.10+commit.fc410830 "$MODULE_MANAGER_ADDR" contracts/ZoraModuleManager.sol:ZoraModuleManager "$ETHERSCAN_API_KEY" 2> /dev/null)
-        then
-            echo "Submitted contract for verification."
-            break
-        else
-            if (( 4 > $I ))
-            then
-                sleep 10
-            else
-                echo "Unable to submit contract verification. Exiting."
-                exit 1
-            fi
-        fi
-    }
-done
-
-
-echo ""
-
-FEE_SETTINGS_INIT_OUTPUT=$(cast send --from $WALLET_ADDRESS --private-key $PRIVATE_KEY $FEE_SETTINGS_ADDR "init(address,address)" "$MODULE_MANAGER_ADDR" "0x0000000000000000000000000000000000000000" --rpc-url $RPC_URL)
-FEE_SETTINGS_INIT_TX_HASH=$(echo $FEE_SETTINGS_INIT_OUTPUT | rev | cut -d " " -f5 | rev | tr -d '"')
-FEE_SETTINGS_INIT_TX_STATUS=$(echo $FEE_SETTINGS_INIT_OUTPUT | rev | cut -d " " -f7 | rev | tr -d '"')
-if [ $FEE_SETTINGS_INIT_TX_STATUS != "0x1" ]
-then
-    echo "Transaction $FEE_SETTINGS_INIT_TX_HASH did not succeed. Exiting."
-    exit 1
-else
-    echo "ZoraProtocolFeeSettings.init transaction $FEE_SETTINGS_INIT_TX_HASH succeeded."
-fi
-
-FEE_SETTINGS_SET_OWNER_OUTPUT=$(cast send --from $WALLET_ADDRESS --private-key $PRIVATE_KEY $FEE_SETTINGS_ADDR "setOwner(address)" "$FEE_SETTINGS_OWNER" --rpc-url $RPC_URL)
-FEE_SETTINGS_SET_OWNER_TX_HASH=$(echo $FEE_SETTINGS_SET_OWNER_OUTPUT | rev | cut -d " " -f5 | rev | tr -d '"')
-FEE_SETTINGS_SET_OWNER_TX_STATUS=$(echo $FEE_SETTINGS_SET_OWNER_OUTPUT | rev | cut -d " " -f7 | rev | tr -d '"')
-if [ $FEE_SETTINGS_SET_OWNER_TX_STATUS != "0x1" ]
-then
-    echo "Transaction $FEE_SETTINGS_SET_OWNER_TX_HASH did not succeed. Exiting."
-    exit 1
-else
-    echo "ZoraProtocolFeeSettings.setOwner transaction $FEE_SETTINGS_SET_OWNER_TX_HASH succeeded."
-fi
-
-python3 ./deploy/update-adresses.py $CHAIN_ID ZoraProtocolFeeSettings $FEE_SETTINGS_ADDR ZoraModuleManager $MODULE_MANAGER_ADDR
 
 echo ""
 echo "Done."
