@@ -78,6 +78,7 @@ echo ""
 echo "Deploying ZoraProtocolFeeSettings..."
 FEE_SETTINGS_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraProtocolFeeSettings)
 FEE_SETTINGS_ADDR=$(echo $FEE_SETTINGS_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
+FEE_SETTINGS_ADDR=$(cast --to-checksum-address $FEE_SETTINGS_ADDR)
 if [[ $FEE_SETTINGS_ADDR =~ ^0x[0-9a-f]{40}$ ]]
 then
     echo "ZoraProtocolFeeSettings deployed to $FEE_SETTINGS_ADDR"
@@ -112,6 +113,7 @@ echo ""
 echo "Deploying ZoraModuleManager..."
 MODULE_MANAGER_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraModuleManager --constructor-args "$REGISTRAR" --constructor-args "$FEE_SETTINGS_ADDR")
 MODULE_MANAGER_ADDR=$(echo $MODULE_MANAGER_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
+MODULE_MANAGER_ADDR=$(cast --to-checksum-address $MODULE_MANAGER_ADDR)
 if [[ $MODULE_MANAGER_ADDR =~ ^0x[0-9a-f]{40}$ ]]
 then
     echo "ZoraModuleManager deployed to $MODULE_MANAGER_ADDR"
