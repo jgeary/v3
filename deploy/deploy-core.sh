@@ -11,6 +11,12 @@ then
     exit 1
 fi
 
+if [ "$ETHERSCAN_API_KEY" = "" ]
+then
+    echo "Missing ETHERSCAN_API_KEY. Exiting."
+    exit 1
+fi
+
 if [ "$CHAIN_ID" = "" ]
 then
     echo "Missing CHAIN_ID. Exiting."
