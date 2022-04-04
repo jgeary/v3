@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# must be run from root folder, not from inside deploy
+
 import sys, json
 from os.path import exists
 
@@ -8,7 +10,7 @@ if __name__ == '__main__':
     if num_args % 2 == 0 or num_args < 3:
         raise Exception('args must be chainid followed by pairs of contract name, contract address')
     chain_id = sys.argv[0]
-    file_path = '../addresses/' + chain_id + '.json'
+    file_path = 'addresses/' + chain_id + '.json'
     file_exists = exists(file_path)
     addrs_dict = {}
     if (file_exists):
