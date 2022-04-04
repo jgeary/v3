@@ -13,5 +13,10 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup
-        run: curl -L https://foundry.paradigm.xyz | bash && foundryup && forge
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+      - name: Run deploy script
+        run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.network }} ${{ github.event.inputs.overwrite }}
+ 
