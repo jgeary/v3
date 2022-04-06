@@ -99,7 +99,7 @@ do
         then
             echo "Submitted contract for verification."
             echo "Output:"
-            echo $FEE_SETTINGS_VERIFY_OUTPUT
+            echo "$FEE_SETTINGS_VERIFY_OUTPUT"
             break
         else
             if (( 4 > $I ))
@@ -125,7 +125,7 @@ then
     echo "ZoraModuleManager deployed to $MODULE_MANAGER_ADDR"
 else
     echo "Could not find contract address in forge output"
-    echo $MODULE_MANAGER_DEPLOY_OUTPUT
+    echo "$MODULE_MANAGER_DEPLOY_OUTPUT"
     exit 1
 fi
 MODULE_MANAGER_ADDR=$(cast --to-checksum-address $MODULE_MANAGER_ADDR)
@@ -139,7 +139,7 @@ do
         then
             echo "Submitted contract for verification."
             echo "Output:"
-            echo $MODULE_MANAGER_VERIFY_OUTPUT
+            echo "$MODULE_MANAGER_VERIFY_OUTPUT"
             break
         else
             if (( 4 > $I ))

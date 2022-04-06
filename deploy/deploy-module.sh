@@ -160,7 +160,7 @@ do
         then
             echo "Submitted contract for verification."
             echo "Output:"
-            echo MODULE_VERIFY_OUTPUT
+            echo "$MODULE_VERIFY_OUTPUT"
             break
         else
             if (( 4 > $I ))
