@@ -107,7 +107,7 @@ fi
 
 ADDRESSES_FILENAME="addresses/$CHAIN_ID.json"
 echo "Checking for existing contract addresses"
-if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['$MODULE_NAME'])" 2> /dev/null)
+if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['$MODULE_NAME'])")
 then
     echo "$MODULE_NAME already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
     if [ $OVERWRITE = "dontoverwrite" ]
