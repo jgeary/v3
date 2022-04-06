@@ -127,9 +127,13 @@ echo ""
 
 echo "Deploying $MODULE_NAME..."
 MODULE_DEPLOY_CMD="forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $MODULE_NAME"
+if (($# > 0))
+then
+    MODULE_DEPLOY_CMD="${MODULE_DEPLOY_CMD} --constructor-args"
+fi
 for arg in "$@"
 do
-    MODULE_DEPLOY_CMD="${MODULE_DEPLOY_CMD} --constructor-args $arg"
+    MODULE_DEPLOY_CMD="${MODULE_DEPLOY_CMD} $arg"
 done
 MODULE_DEPLOY_OUTPUT=$(${MODULE_DEPLOY_CMD})
 MODULE_ADDR=$(echo $MODULE_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
