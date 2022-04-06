@@ -107,7 +107,7 @@ fi
 
 ADDRESSES_FILENAME="addresses/$CHAIN_ID.json"
 echo "Checking for existing contract addresses"
-if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['$MODULE_NAME'])")
+if EXISTING_ADDRESS=$(test -f "$ADDRESSES_FILENAME" && cat "$ADDRESSES_FILENAME" | python3 -c "import sys, json; print(json.load(sys.stdin)['$MODULE_NAME'])" 2> /dev/null)
 then
     echo "$MODULE_NAME already exists on chain $CHAIN_ID at $EXISTING_ADDRESS."
     if [ $OVERWRITE = "dontoverwrite" ]
@@ -152,7 +152,7 @@ MODULE_VERIFY_CMD="${MODULE_VERIFY_CMD} --compiler-version v0.8.10+commit.fc4108
 for I in 0 1 2 3 4
 do
     {
-        if MODULE_VERIFY_OUTPUT=$(${MODULE_VERIFY_CMD} 2> /dev/null)
+        if MODULE_VERIFY_OUTPUT=$(${MODULE_VERIFY_CMD})
         then
             echo "Submitted contract for verification."
             break
