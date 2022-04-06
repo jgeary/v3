@@ -159,6 +159,8 @@ do
         if MODULE_VERIFY_OUTPUT=$(${MODULE_VERIFY_CMD})
         then
             echo "Submitted contract for verification."
+            echo "Output:"
+            echo "$MODULE_VERIFY_OUTPUT"
             break
         else
             if (( 4 > $I ))
@@ -172,7 +174,7 @@ do
     }
 done
 
-python3 ./deploy/update-addresses.py $CHAIN_ID MODULE_NAME $MODULE_ADDR
+python3 ./deploy/update-addresses.py $CHAIN_ID $MODULE_NAME $MODULE_ADDR
 
 echo ""
 echo "Done."

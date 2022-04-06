@@ -3,8 +3,6 @@
 # args: 'overwrite' or 'dontoverwrite' to redeploy and commit new addresses
 # env: ETHERSCAN_API_KEY, CHAIN_ID, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER
 
-python3 ./deploy/update-addresses.py 4 ZoraProtocolFeeSettings 0x0b15d359432b1cdc44782a85132fa37e7f2e02a6 ZoraModuleManager 0x7c4d001b34bfbbcb5a8a0de35603d5e0d52b5620
-
 if [ "$1" != "overwrite" ] && [ "$1" != "" ]
 then
     echo "Invalid overwrite argument. Exiting."
@@ -100,6 +98,8 @@ do
         if FEE_SETTINGS_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --compiler-version v0.8.10+commit.fc410830 "$FEE_SETTINGS_ADDR" contracts/auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol:ZoraProtocolFeeSettings "$ETHERSCAN_API_KEY")
         then
             echo "Submitted contract for verification."
+            echo "Output:"
+            echo "$FEE_SETTINGS_VERIFY_OUTPUT"
             break
         else
             if (( 4 > $I ))
@@ -118,14 +118,14 @@ echo ""
 
 
 echo "Deploying ZoraModuleManager..."
-MODULE_MANAGER_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraModuleManager --constructor-args "$REGISTRAR" --constructor-args "$FEE_SETTINGS_ADDR")
+MODULE_MANAGER_DEPLOY_OUTPUT=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ZoraModuleManager --constructor-args "$REGISTRAR" "$FEE_SETTINGS_ADDR")
 MODULE_MANAGER_ADDR=$(echo $MODULE_MANAGER_DEPLOY_OUTPUT | rev | cut -d " " -f4 | rev)
 if [[ $MODULE_MANAGER_ADDR =~ ^0x[0-9a-f]{40}$ ]]
 then
     echo "ZoraModuleManager deployed to $MODULE_MANAGER_ADDR"
 else
     echo "Could not find contract address in forge output"
-    echo $MODULE_MANAGER_DEPLOY_OUTPUT
+    echo "$MODULE_MANAGER_DEPLOY_OUTPUT"
     exit 1
 fi
 MODULE_MANAGER_ADDR=$(cast --to-checksum-address $MODULE_MANAGER_ADDR)
@@ -138,6 +138,8 @@ do
         if MODULE_MANAGER_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --constructor-args "$MODULE_MANAGER_ENCODED_ARGS" --compiler-version v0.8.10+commit.fc410830 "$MODULE_MANAGER_ADDR" contracts/ZoraModuleManager.sol:ZoraModuleManager "$ETHERSCAN_API_KEY")
         then
             echo "Submitted contract for verification."
+            echo "Output:"
+            echo "$MODULE_MANAGER_VERIFY_OUTPUT"
             break
         else
             if (( 4 > $I ))
