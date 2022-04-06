@@ -97,7 +97,7 @@ echo "Submitting contract to etherscan for verification..."
 for I in 0 1 2 3 4
 do
     {
-        if FEE_SETTINGS_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --compiler-version v0.8.10+commit.fc410830 "$FEE_SETTINGS_ADDR" contracts/auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol:ZoraProtocolFeeSettings "$ETHERSCAN_API_KEY" 2> /dev/null)
+        if FEE_SETTINGS_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --compiler-version v0.8.10+commit.fc410830 "$FEE_SETTINGS_ADDR" contracts/auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol:ZoraProtocolFeeSettings "$ETHERSCAN_API_KEY")
         then
             echo "Submitted contract for verification."
             break
@@ -135,7 +135,7 @@ MODULE_MANAGER_ENCODED_ARGS=$(cast abi-encode "constructor(address,address)" "$R
 for I in 0 1 2 3 4
 do
     {
-        if MODULE_MANAGER_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --constructor-args "$MODULE_MANAGER_ENCODED_ARGS" --compiler-version v0.8.10+commit.fc410830 "$MODULE_MANAGER_ADDR" contracts/ZoraModuleManager.sol:ZoraModuleManager "$ETHERSCAN_API_KEY" 2> /dev/null)
+        if MODULE_MANAGER_VERIFY_OUTPUT=$(forge verify-contract --chain-id $CHAIN_ID --num-of-optimizations 500000 --constructor-args "$MODULE_MANAGER_ENCODED_ARGS" --compiler-version v0.8.10+commit.fc410830 "$MODULE_MANAGER_ADDR" contracts/ZoraModuleManager.sol:ZoraModuleManager "$ETHERSCAN_API_KEY")
         then
             echo "Submitted contract for verification."
             break
