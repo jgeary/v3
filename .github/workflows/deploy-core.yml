@@ -47,7 +47,7 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           dry-run: false
       - name: Bundle release
-        run: sudo apt-get install zip && zip -r release.zip dist package.json LICENSE README.md
+        run: sudo apt-get install zip && zip -r ${{ env.TAG }}.zip dist package.json LICENSE README.md
       - uses: ncipollo/release-action@v1
         with:
           artifacts: ${{ env.TAG }}.zip
