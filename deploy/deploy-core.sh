@@ -104,7 +104,7 @@ do
         else
             if (( 4 > $I ))
             then
-                sleep 10
+                sleep 15
             else
                 echo "Unable to submit contract verification. Exiting."
                 exit 1
