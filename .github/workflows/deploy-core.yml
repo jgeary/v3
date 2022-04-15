@@ -4,7 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Name of github environment. Environment must contain env vars CHAIN_ID, ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER."
+        description: "Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER."
+        required: true
+      chainid:
+        description: "chain id for corresponding environment. Needs to be input rather than env var otherwise all occurrences of it will be scrubbed from output."
         required: true
       overwrite:
         description: 'Optional. Enter "overwrite" to deploy even if core contracts already have addresses in addresses/<chain-id>.json file.'
@@ -34,7 +37,7 @@ jobs:
       - name: Push new addresses and package.json
         uses: EndBug/add-and-commit@v9
         with:
-          add: '["addresses/${{ secrets.CHAIN_ID }}.json", "package.json"]'
+          add: '["addresses/${{ github.event.inputs.chainid }}.json", "package.json"]'
           message: "Commit from Github Actions (deploy core)"
           new_branch: main
           pathspec_error_handling: ignore
@@ -42,7 +45,7 @@ jobs:
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
-          dry-run: true
+          dry-run: false
       - name: Bundle release
         run: sudo apt-get install zip && zip -r release.zip dist package.json LICENSE README.md
       - uses: ncipollo/release-action@v1
@@ -52,7 +55,7 @@ jobs:
           tag: ${{ env.TAG }}
     env:
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
-      CHAIN_ID: ${{ secrets.CHAIN_ID }}
+      CHAIN_ID: ${{ github.event.inputs.chainid }}
       RPC_URL: ${{ secrets.RPC_URL }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
