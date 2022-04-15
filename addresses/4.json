@@ -13,6 +13,6 @@
   "ReserveAuctionListingEth": "0x665814dA60D1Ddc23Fa1F69C1F5B5CAF63ab24b3",
   "RoyaltyEngineV1": "0x8d17687ea9a6bb6efA24ec11DcFab01661b2ddcd",
   "WETH": "0xc778417e063141139fce010982780140aa0cd5ab",
-  "ZoraModuleManager": "0xEf415d427093d69726149B562EfDDA56a5a4Bd3A",
-  "ZoraProtocolFeeSettings": "0x39a9BD3F2191D1D11b0CF78a8Ac23b76706f3984"
+  "ZoraModuleManager": "0xD0531414f66e4C6bcfED9955A999746A5A41c9ef",
+  "ZoraProtocolFeeSettings": "0x15CdF0bb9F67db0Ed2d9cdd3d18D0a8bB499f05C"
 }
