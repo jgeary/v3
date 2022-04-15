@@ -33,7 +33,7 @@ jobs:
       - name: Run deploy script
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
       - name: Bump version
-        run: npm i json-bump && json-bump package.json && NEW_VERSION=$(cat package.json | json version) && TAG=v$NEW_VERSION
+        run: npm i -g json-bump && json-bump package.json && NEW_VERSION=$(cat package.json | json version) && TAG=v$NEW_VERSION
       - name: Push new addresses and package.json
         uses: EndBug/add-and-commit@v9
         with:
