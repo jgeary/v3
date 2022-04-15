@@ -33,7 +33,7 @@ jobs:
       - name: Run deploy script
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
       - name: Bump version
-        run: npm i -g json-bump && json-bump package.json && npm i -g json && NEW_VERSION=$(cat package.json | json version) && TAG=v$NEW_VERSION
+        run: npm i -g json-bump && json-bump package.json && npm i -g json && echo "NEW_VERSION=$(cat package.json | json version)" >> $GITHUB_ENV && echo "TAG=v$NEW_VERSION" >> $GITHUB_ENV
       - name: Push new addresses and package.json
         uses: EndBug/add-and-commit@v9
         with:
@@ -50,7 +50,7 @@ jobs:
         run: sudo apt-get install zip && zip -r release.zip dist package.json LICENSE README.md
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "${TAG}.zip"
+          artifacts: "${{ env.TAG }}.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: $TAG
     env:
