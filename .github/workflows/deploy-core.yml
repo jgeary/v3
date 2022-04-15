@@ -33,7 +33,9 @@ jobs:
       - name: Run deploy script
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
       - name: Bump version
-        run: npm i -g json-bump && json-bump package.json && npm i -g json && echo "NEW_VERSION=$(cat package.json | json version)" >> $GITHUB_ENV && echo "TAG=v${{ env.NEW_VERSION }}" >> $GITHUB_ENV && echo $NEW_VERSION && echo "$NEW_VERSION" && echo {{ env.NEW_VERSION }} && echo $TAG && echo "$TAG" && echo {{ env.TAG }}
+        run: npm i -g json-bump && json-bump package.json && npm i -g json && echo "TAG=v$(cat package.json | json version)" >> $GITHUB_ENV
+      - name: Test tag
+        run: echo $TAG
       - name: Push new addresses and package.json
         uses: EndBug/add-and-commit@v9
         with:
