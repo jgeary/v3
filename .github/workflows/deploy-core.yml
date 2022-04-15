@@ -28,8 +28,8 @@ jobs:
         uses: onbjerg/foundry-toolchain@v1
         with:
           version: nightly
-      - name: Prepublish
-        run: yarn prepublishOnly
+      - name: Build
+        run: forge build
       - name: Run deploy script
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
       - name: Bump version
@@ -41,7 +41,7 @@ jobs:
           message: "Commit from Github Actions (deploy core)"
           new_branch: main
           pathspec_error_handling: ignore
-          tag: "$TAG"
+          tag: $TAG
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
