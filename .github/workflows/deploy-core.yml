@@ -47,12 +47,12 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           dry-run: true
       - name: Bundle release
-        run: sudo apt-get install zip && zip release.zip dist package.json LICENSE README.md
+        run: sudo apt-get install zip && zip -r release.zip dist package.json LICENSE README.md
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "release.zip"
+          artifacts: "${TAG}.zip"
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: "$TAG"
+          tag: $TAG
     env:
       ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
       CHAIN_ID: ${{ github.event.inputs.chainid }}
