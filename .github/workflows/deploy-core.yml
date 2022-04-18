@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER."
+        description: "Name of github environment, i.e. rinkeby. Environment can be named anything as long as it includes the following vars: NPM_TOKEN, ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER."
         required: true
       chainid:
-        description: "chain id for corresponding environment. Needs to be input rather than env var otherwise all occurrences of it will be scrubbed from output."
+        description: "Chain id for corresponding environment. This can't be an environment variable due to an annoying technicality."
         required: true
       overwrite:
         description: 'Optional. Enter "overwrite" to deploy even if core contracts already have addresses in addresses/<chain-id>.json file.'

@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Name of github environment. Environment must contain env vars ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS, REGISTRAR, FEE_SETTINGS_OWNER."
+        description: "Name of github environment, i.e. rinkeby. Environment can be named anything as long as it includes the following vars: NPM_TOKEN, ETHERSCAN_API_KEY, RPC_URL, PRIVATE_KEY, WALLET_ADDRESS."
         required: true
       chainid:
-        description: "chain id for corresponding environment. Needs to be input rather than env var otherwise all occurrences of it will be scrubbed from output."
+        description: "Chain id for corresponding environment. This can't be an environment variable due to an annoying technicality."
         required: true
       overwrite:
-        description: 'Optional. Enter "overwrite" to deploy even if contract already has an address in addresses/<chain_id>.json file.'
+        description: 'Optional. Enter "overwrite" to deploy and update address even if address already exists in addresses/<chain_id>.json file.'
         default: "dontoverwrite"
       module_name:
         description: "Name of contract in solidity file, i.e. AsksV1_1"
@@ -22,7 +22,7 @@ on:
         description: 'Constructor abi in quotes, i.e. "constructor(address,string)"'
         required: true
       constructor_args:
-        description: 'Arbitrary constructor args, exactly how you pass them into cli. i.e. 0x123...789 "This is an arg with spaces"'
+        description: 'Arbitrary constructor args, exactly how you pass them into cli. i.e.: 0x123 0 1 "This 4th arg is a string with spaces"'
 
 jobs:
   deploy:
@@ -46,7 +46,7 @@ jobs:
         run: bash ./deploy/deploy-module.sh ${{ github.event.inputs.overwrite }} ${{ github.event.inputs.module_path }} ${{ github.event.inputs.module_name }} ${{ github.event.inputs.constructor_abi }} ${{ github.event.inputs.constructor_args }}
       - name: Bump version
         run: npm i -g json-bump && json-bump package.json && yarn prettier --write package.json && npm i -g json && echo "TAG=v$(cat package.json | json version)" >> $GITHUB_ENV
-      - name: Push new addresses
+      - name: Push new addresses and package.json
         uses: EndBug/add-and-commit@v9
         with:
           add: '["addresses/${{ github.event.inputs.chainid }}.json", "package.json"]'
@@ -71,5 +71,3 @@ jobs:
       RPC_URL: ${{ secrets.RPC_URL }}
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       WALLET_ADDRESS: ${{ secrets.WALLET_ADDRESS }}
-      REGISTRAR: ${{ secrets.REGISTRAR }}
-      FEE_SETTINGS_OWNER: ${{ secrets.FEE_SETTINGS_OWNER }}
