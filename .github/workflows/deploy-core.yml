@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - run: npm install
+      - run: npm install && npm install --global yarn
       - name: Install Foundry
         uses: onbjerg/foundry-toolchain@v1
         with:
@@ -33,7 +33,7 @@ jobs:
       - name: Run deploy script
         run: bash ./deploy/deploy-core.sh ${{ github.event.inputs.overwrite }}
       - name: Bump version
-        run: npm i -g json-bump && json-bump package.json && npm i -g json && echo "TAG=v$(cat package.json | json version)" >> $GITHUB_ENV
+        run: npm i -g json-bump && json-bump package.json && yarn prettier --write package.json && npm i -g json && echo "TAG=v$(cat package.json | json version)" >> $GITHUB_ENV
       - name: Push new addresses and package.json
         uses: EndBug/add-and-commit@v9
         with:
