@@ -1,8 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity 0.8.10;
 
-import {LibDiamond} from "../../../common/DiamondPermanentSelectors/libraries/LibDiamond.sol";
+import {LibDiamond} from "../../../../common/DiamondPermanentSelectors/libraries/LibDiamond.sol";
 import {MockStorage} from "./MockStorage.sol";
+
+interface IMockFacet {
+    function setData(bool _foo, uint8 _bar) external;
+
+    function getData() external view returns (bool, uint8);
+}
 
 contract MockFacet {
     MockStorage internal s;
