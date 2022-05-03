@@ -5,6 +5,7 @@ import {DSTest} from "ds-test/test.sol";
 
 import {Diamond} from "../../../common/DiamondPermanentSelectors/Diamond.sol";
 import {IDiamondCut} from "../../../common/DiamondPermanentSelectors/interfaces/IDiamondCut.sol";
+import {IDiamondLoupe} from "../../../common/DiamondPermanentSelectors/interfaces/IDiamondLoupe.sol";
 import {MockFacet, IMockFacet} from "../../utils/modules/OffchainOrdersDiamond/MockFacet.sol";
 import {MockInit} from "../../utils/modules/OffchainOrdersDiamond/MockInit.sol";
 
@@ -35,14 +36,41 @@ contract OffchainOrdersDiamondTest is DSTest {
         // Cut mock facet
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
         bytes4[] memory selectors = new bytes4[](2);
-        selectors[0] = facet.setData.selector;
-        selectors[1] = facet.getData.selector;
+        selectors[0] = MockFacet.setData.selector;
+        selectors[1] = MockFacet.getData.selector;
         cut[0] = IDiamondCut.FacetCut(address(facet), IDiamondCut.FacetCutAction.Add, selectors);
 
         IDiamondCut(address(diamond)).diamondCut(cut, address(init), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
     }
+    
+    // test Replace is not allowed, Remove is allowed but cannot Add again
+    function test_LibDiamond() public {
+        require(IDiamondLoupe(address(diamond)).facetFunctionSelectors(address(facet)).length == 2);
 
-    function test_init() public {
+        MockFacet otherFacet = new MockFacet();
+        MockInit otherInit = new MockInit();
+
+        IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
+        bytes4[] memory selectors = new bytes4[](1);
+        selectors[0] = MockFacet.setData.selector;
+        cut[0] = IDiamondCut.FacetCut(address(otherFacet), IDiamondCut.FacetCutAction.Replace, selectors);
+
+        vm.expectRevert("LibDiamondCut: Incorrect FacetCutAction");
+        IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
+        
+        cut[0] = IDiamondCut.FacetCut(address(0), IDiamondCut.FacetCutAction.Remove, selectors);
+        IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
+        require(IDiamondLoupe(address(diamond)).facetFunctionSelectors(address(facet)).length == 1);
+
+        cut[0] = IDiamondCut.FacetCut(address(otherFacet), IDiamondCut.FacetCutAction.Add, selectors);
+        vm.expectRevert("DiamondPermanentSelectors: Can't add selector that was previously removed");
+        IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
+
+        vm.expectRevert("Diamond: Function does not exist");
+        IMockFacet(address(diamond)).setData(true, 0);
+    }
+
+    function test_Init() public {
         (bool foo, uint8 bar) = IMockFacet(address(diamond)).getData();
         require(foo == true);
         require(bar == 2);

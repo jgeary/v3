@@ -129,7 +129,7 @@ library LibDiamond {
         for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
             // fail if selector already existed and was removed
-            require(!ds.selectorWasRemoved[selector], "LibDiamondCutPermanentSelectors: Can't add selector that was previously removed");
+            require(!ds.selectorWasRemoved[selector], "DiamondPermanentSelectors: Can't add selector that was previously removed");
             address oldFacetAddress = ds.selectorToFacetAndPosition[selector].facetAddress;
             require(oldFacetAddress == address(0), "LibDiamondCut: Can't add function that already exists");
             ds.facetFunctionSelectors[_facetAddress].functionSelectors.push(selector);
