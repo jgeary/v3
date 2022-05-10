@@ -15,7 +15,7 @@ import {VM} from "../../utils/VM.sol";
 
 /// @title AsksV1_1IntegrationTest
 /// @notice Integration Tests for Asks v1.1
-contract OffchainOrdersDiamondTest is DSTest {
+contract DiamondPermanentSelectorsTest is DSTest {
     VM internal vm;
 
     Diamond internal diamond;
@@ -42,7 +42,7 @@ contract OffchainOrdersDiamondTest is DSTest {
 
         IDiamondCut(address(diamond)).diamondCut(cut, address(init), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
     }
-    
+
     // test Replace is not allowed, Remove is allowed but cannot Add again
     function test_LibDiamond() public {
         require(IDiamondLoupe(address(diamond)).facetFunctionSelectors(address(facet)).length == 2);
@@ -57,7 +57,7 @@ contract OffchainOrdersDiamondTest is DSTest {
 
         vm.expectRevert("LibDiamondCut: Incorrect FacetCutAction");
         IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
-        
+
         cut[0] = IDiamondCut.FacetCut(address(0), IDiamondCut.FacetCutAction.Remove, selectors);
         IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
         require(IDiamondLoupe(address(diamond)).facetFunctionSelectors(address(facet)).length == 1);
