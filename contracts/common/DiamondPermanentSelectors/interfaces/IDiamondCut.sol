@@ -6,7 +6,10 @@ pragma solidity 0.8.10;
 /******************************************************************************/
 
 interface IDiamondCut {
-    enum FacetCutAction {Add, Replace, Remove}
+    enum FacetCutAction {
+        Add,
+        Remove
+    }
 
     struct FacetCut {
         address facetAddress;
