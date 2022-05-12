@@ -43,7 +43,7 @@ contract DiamondPermanentSelectorsTest is DSTest {
         IDiamondCut(address(diamond)).diamondCut(cut, address(init), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
     }
 
-    // test Replace is not allowed, Remove is allowed but cannot Add again
+    // test Remove is allowed but cannot Add again
     function test_LibDiamond() public {
         require(IDiamondLoupe(address(diamond)).facetFunctionSelectors(address(facet)).length == 2);
 
@@ -53,10 +53,6 @@ contract DiamondPermanentSelectorsTest is DSTest {
         IDiamondCut.FacetCut[] memory cut = new IDiamondCut.FacetCut[](1);
         bytes4[] memory selectors = new bytes4[](1);
         selectors[0] = MockFacet.setData.selector;
-        cut[0] = IDiamondCut.FacetCut(address(otherFacet), IDiamondCut.FacetCutAction.Replace, selectors);
-
-        vm.expectRevert("LibDiamondCut: Incorrect FacetCutAction");
-        IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));
 
         cut[0] = IDiamondCut.FacetCut(address(0), IDiamondCut.FacetCutAction.Remove, selectors);
         IDiamondCut(address(diamond)).diamondCut(cut, address(otherInit), abi.encodeWithSelector(MockInit.init.selector, bytes("")));

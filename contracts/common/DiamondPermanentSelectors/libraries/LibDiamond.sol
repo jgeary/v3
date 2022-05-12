@@ -5,14 +5,24 @@ pragma solidity 0.8.10;
 * Author: jgeary <james@zora.co> (adapted from LibDiamond by Nick Mudge and Aavegotchi)
 /******************************************************************************/
 
+// IMPORTANT: make sure royalty interface is compatible with address set in initializer
+import {IRoyaltyEngineV1} from "@manifoldxyz/royalty-registry-solidity/contracts/IRoyaltyEngineV1.sol";
 import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
 import {IDiamondCut} from "../interfaces/IDiamondCut.sol";
 import {IDiamondLoupe} from "../interfaces/IDiamondLoupe.sol";
 import {IERC173} from "../interfaces/IERC173.sol";
+import {IWETH} from "../../OutgoingTransferSupport/V1/IWETH.sol";
 import {LibMeta} from "./LibMeta.sol";
+import {ERC721TransferHelper} from "../../../transferHelpers/ERC721TransferHelper.sol";
+import {ERC20TransferHelper} from "../../../transferHelpers/ERC20TransferHelper.sol";
+import {ZoraModuleManager} from "../../../ZoraModuleManager.sol";
+import {ZoraProtocolFeeSettings} from "../../../auxiliary/ZoraProtocolFeeSettings/ZoraProtocolFeeSettings.sol";
 
 library LibDiamond {
-    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("diamond.standard.diamond.storage");
+    bytes32 constant DIAMOND_STORAGE_POSITION = keccak256("zora.diamond.storage");
+
+    uint256 private constant REENTRANCY_NOT_ENTERED = 1;
+    uint256 private constant REENTRANCY_ENTERED = 2;
 
     struct FacetAddressAndPosition {
         address facetAddress;
@@ -39,6 +49,17 @@ library LibDiamond {
         mapping(bytes4 => bool) selectorWasRemoved;
         // owner of the contract
         address contractOwner;
+        // reentrancy status
+        uint256 reentrancy_status;
+        // shared v3
+        ERC20TransferHelper erc20TransferHelper;
+        ERC721TransferHelper erc721TransferHelper;
+        ZoraModuleManager zoraModuleManager;
+        ZoraProtocolFeeSettings zoraProtocolFeeSettings;
+        bytes32 SIGNED_MODULE_APPROVAL_TYPEHASH;
+        address registrar;
+        IWETH weth;
+        IRoyaltyEngineV1 royaltyEngine;
     }
 
     function diamondStorage() internal pure returns (DiamondStorage storage ds) {
@@ -46,6 +67,21 @@ library LibDiamond {
         assembly {
             ds.slot := position
         }
+    }
+
+    function reentrancyStatusIsNotEntered() internal view returns (bool) {
+        DiamondStorage storage ds = diamondStorage();
+        return ds.reentrancy_status == REENTRANCY_NOT_ENTERED;
+    }
+
+    function reentrancyGuardSetStatusEntered() internal {
+        DiamondStorage storage ds = diamondStorage();
+        ds.reentrancy_status = REENTRANCY_ENTERED;
+    }
+
+    function reentrancyGuardSetStatusNotEntered() internal {
+        DiamondStorage storage ds = diamondStorage();
+        ds.reentrancy_status = REENTRANCY_NOT_ENTERED;
     }
 
     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
