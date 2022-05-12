@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import {ZoraModuleManager} from "../../../ZoraModuleManager.sol";
 import {LibDiamond} from "../../../common/DiamondPermanentSelectors/libraries/LibDiamond.sol";
+import {LibMeta} from "../../../common/DiamondPermanentSelectors/libraries/LibMeta.sol";
 import {LibAppStorage} from "../libraries/LibAppStorage.sol";
 import {IAsks} from "../interfaces/IAsks.sol";
 import {ReentrancyGuardDiamond} from "../../../common/DiamondPermanentSelectors/utils/ReentrancyGuardDiamond.sol";
@@ -119,9 +120,9 @@ contract AsksFacet is ReentrancyGuardDiamond, TransferAndPayoutSupportV1 {
 
         // Transfer the NFT to the buyer
         // Reverts if the seller did not approve the ERC721TransferHelper or no longer owns the token
-        ds.erc721TransferHelper.transferFrom(tokenContract, seller, msg.sender, tokenId);
+        ds.erc721TransferHelper.transferFrom(tokenContract, seller, LibMeta.msgSender(), tokenId);
 
-        emit AskFilled(_ask, msg.sender, _finder);
+        emit AskFilled(_ask, LibMeta.msgSender(), _finder);
 
         // Increment the nonce for the associated token
         // Cannot realistically overflow
@@ -184,7 +185,7 @@ contract AsksFacet is ReentrancyGuardDiamond, TransferAndPayoutSupportV1 {
         address buyer
     ) internal {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
-        ds.erc721TransferHelper.transferFrom(tokenContract, seller, msg.sender, tokenId);
+        ds.erc721TransferHelper.transferFrom(tokenContract, seller, LibMeta.msgSender(), tokenId);
     }
 
     // /// @notice Fills the given signed ask for an NFT with a signed module approval
@@ -257,10 +258,10 @@ contract AsksFacet is ReentrancyGuardDiamond, TransferAndPayoutSupportV1 {
 
     //     // Transfer the NFT to the buyer
     //     // Reverts if the seller did not approve the ERC721TransferHelper or no longer owns the token
-    //     // ds.erc721TransferHelper.transferFrom(tokenContract, seller, msg.sender, tokenId);
-    //     _transferToken(tokenContract, tokenId, seller, msg.sender);
+    //     // ds.erc721TransferHelper.transferFrom(tokenContract, seller, LibMeta.msgSender(), tokenId);
+    //     _transferToken(tokenContract, tokenId, seller, LibMeta.msgSender());
 
-    //     // emit AskFilled(_ask, msg.sender, _finder);
+    //     // emit AskFilled(_ask, LibMeta.msgSender(), _finder);
 
     //     _incrementNonce(seller, tokenContract, tokenId);
     // }
@@ -286,10 +287,10 @@ contract AsksFacet is ReentrancyGuardDiamond, TransferAndPayoutSupportV1 {
         // Increment msg.sender's nonce for the associated token
         // Cannot realistically overflow
         unchecked {
-            oldNonce = ++s.SIGNED_ASKS_nonce[msg.sender][_tokenContract][_tokenId];
+            oldNonce = ++s.SIGNED_ASKS_nonce[LibMeta.msgSender()][_tokenContract][_tokenId];
         }
 
-        emit AskCanceled(msg.sender, _tokenContract, _tokenId, oldNonce);
+        emit AskCanceled(LibMeta.msgSender(), _tokenContract, _tokenId, oldNonce);
     }
 
     ///                                                          ///

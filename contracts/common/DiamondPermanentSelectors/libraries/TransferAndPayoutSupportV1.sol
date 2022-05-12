@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {LibDiamond} from "../libraries/LibDiamond.sol";
+import {LibMeta} from "../libraries/LibMeta.sol";
 
 /// @title OutgoingTransferSupportV1
 /// @author tbtstl <t@zora.co>
@@ -58,7 +59,7 @@ contract TransferAndPayoutSupportV1 {
             // full amount to the market, resulting in potentally locked funds
             IERC20 token = IERC20(_currency);
             uint256 beforeBalance = token.balanceOf(address(this));
-            ds.erc20TransferHelper.safeTransferFrom(_currency, msg.sender, address(this), _amount);
+            ds.erc20TransferHelper.safeTransferFrom(_currency, LibMeta.msgSender(), address(this), _amount);
             uint256 afterBalance = token.balanceOf(address(this));
             require(beforeBalance + _amount == afterBalance, "_handleIncomingTransfer token transfer call did not transfer expected amount");
         }
@@ -105,7 +106,7 @@ contract TransferAndPayoutSupportV1 {
         LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
 
         // Ensure the caller is the contract
-        require(msg.sender == address(this), "_handleRoyaltyEnginePayout only self callable");
+        require(LibMeta.msgSender() == address(this), "_handleRoyaltyEnginePayout only self callable");
 
         // Get the royalty recipients and their associated amounts
         (address payable[] memory recipients, uint256[] memory amounts) = ds.royaltyEngine.getRoyalty(_tokenContract, _tokenId, _amount);
