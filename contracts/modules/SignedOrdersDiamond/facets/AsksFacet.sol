@@ -131,6 +131,118 @@ contract AsksFacet is ReentrancyGuardDiamond, TransferAndPayoutSupportV1 {
         }
     }
 
+    function _handleSignedModuleApproval(
+        address seller,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) internal {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        if (!ds.zoraModuleManager.isModuleApproved(seller, address(this))) {
+            // Approve the module on behalf of the seller
+            ds.zoraModuleManager.setApprovalForModuleBySig(address(this), seller, true, deadline, v, r, s);
+        }
+    }
+
+    function _incrementNonce(
+        address seller,
+        address tokenContract,
+        uint256 tokenId
+    ) internal {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        unchecked {
+            ++s.SIGNED_ASKS_nonce[seller][tokenContract][tokenId];
+        }
+    }
+
+    function _validateNonce(
+        address seller,
+        address tokenContract,
+        uint256 tokenId,
+        uint256 nonce
+    ) internal {
+        LibAppStorage.AppStorage storage s = LibAppStorage.appStorage();
+        require(nonce == s.SIGNED_ASKS_nonce[seller][tokenContract][tokenId], "INVALID_ASK");
+    }
+
+    function _handleFindersFee(
+        uint256 amount,
+        address currency,
+        uint16 findersFeeBps,
+        address finder
+    ) internal returns (uint256) {
+        uint256 findersFee = (amount * findersFeeBps) / 10000;
+        _handleOutgoingTransfer(finder, findersFee, currency, LibAppStorage.USE_ALL_GAS_FLAG);
+
+        return amount - findersFee;
+    }
+
+    function _transferToken(
+        address tokenContract,
+        uint256 tokenId,
+        address seller,
+        address buyer
+    ) internal {
+        LibDiamond.DiamondStorage storage ds = LibDiamond.diamondStorage();
+        ds.erc721TransferHelper.transferFrom(tokenContract, seller, LibMeta.msgSender(), tokenId);
+    }
+
+    /// @notice Fills the given signed ask for an NFT with a signed module approval
+    /// @param ask Ask data
+    /// @param finder Finder address
+    /// @param askSig Ask signature
+    /// @param moduleSig Module signature
+    function fillAsk(
+        IAsks.SignedAsk calldata ask,
+        address finder,
+        IAsks.Signature calldata askSig,
+        IAsks.ModuleApprovalSig calldata moduleSig
+    ) external payable nonReentrant {
+        // Ensure the ask has not expired
+        require(ask.expiry == 0 || ask.expiry >= block.timestamp, "EXPIRED_ASK");
+
+        // Ensure the recovered signer matches the seller
+        // require(_recoverAddress(_ask, _v, _r, _s) == seller, "INVALID_SIG");
+
+        // Ensure the ask nonce matches the token nonce
+        _validateNonce(ask.seller, ask.tokenContract, ask.tokenId, ask.nonce);
+
+        // Ensure the attached ETH matches the price
+        if (ask.currency == address(0)) {
+            require(msg.value == ask.price, "MUST_MATCH_PRICE");
+        }
+
+        // Ensure ETH/ERC-20 payment from buyer is valid and take custody
+        _handleIncomingTransfer(ask.price, ask.currency);
+
+        _handleSignedModuleApproval(ask.seller, moduleSig.deadline, moduleSig.sig.v, moduleSig.sig.r, moduleSig.sig.s);
+
+        uint256 remainingProfit;
+        // Payout associated token royalties, if any
+        (remainingProfit, ) = _handleRoyaltyPayout(ask.tokenContract, ask.tokenId, ask.price, ask.currency, 300000);
+
+        // Payout the module fee, if configured
+        remainingProfit = _handleProtocolFeePayout(remainingProfit, ask.currency);
+
+        // Payout optional finder fee
+        if (finder != address(0)) {
+            remainingProfit = _handleFindersFee(remainingProfit, ask.currency, ask.findersFeeBps, finder);
+        }
+
+        // Transfer the remaining profit to the seller
+        _handleOutgoingTransfer(ask.seller, ask.price, ask.currency, 50000);
+
+        // Transfer the NFT to the buyer
+        // Reverts if the seller did not approve the ERC721TransferHelper or no longer owns the token
+        // ds.erc721TransferHelper.transferFrom(tokenContract, seller, LibMeta.msgSender(), tokenId);
+        _transferToken(ask.tokenContract, ask.tokenId, ask.seller, LibMeta.msgSender());
+
+        // emit AskFilled(_ask, LibMeta.msgSender(), _finder);
+
+        _incrementNonce(ask.seller, ask.tokenContract, ask.tokenId);
+    }
+
     ///                                                          ///
     ///                        CANCEL ASK                        ///
     ///                                                          ///

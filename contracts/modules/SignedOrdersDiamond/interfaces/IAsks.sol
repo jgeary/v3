@@ -2,10 +2,14 @@
 pragma solidity 0.8.10;
 
 interface IAsks {
-    struct ModuleApprovalSig {
+    struct Signature {
         uint8 v; // The 129th byte and chain ID of the signature
         bytes32 r; // The first 64 bytes of the signature
         bytes32 s; // Bytes 64-128 of the signature
+    }
+
+    struct ModuleApprovalSig {
+        Signature sig;
         uint256 deadline; // The deadline at which point the approval expires
     }
 
